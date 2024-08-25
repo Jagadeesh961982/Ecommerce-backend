@@ -14,19 +14,19 @@ import fileUpload from 'express-fileupload';
 
 
 const app=express();
+dotenv.config({path:'./config/config.env'});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(
     {
-        origin:["http://localhost:3000"],
+        origin:[process.env.FRONTEND_URL],
         credentials:true
     }
 ));
-
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(fileUpload())
 
-dotenv.config({path:'./config/config.env'});
 
 
 
