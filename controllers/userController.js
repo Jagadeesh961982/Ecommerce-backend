@@ -4,28 +4,29 @@ import sendEmail from "../utils/sendEmail.js";
 import crypto from "crypto";
 import cloudinary from "cloudinary";
 import Feedbacks from "../models/feedbackModel.js";
-import { create } from "domain";
+import fs from 'fs';
 
 // register a user
 export const registerUser=async(req,res,next)=>{
     let user;
     try{
-        const myCloud=await cloudinary.v2.uploader.upload(req.body.avatar,{
+        if (!req.file) {
+            return res.status(400).send('No file uploaded');
+        }
+
+        const myCloud=await cloudinary.v2.uploader.upload(req.file.path,{
             folder:"avatars",
             width:150,
             crop:"scale"
         })
+        
+        
+       
         let {name,email,password}=req.body;
-        // console.log(myCloud.public_id,myCloud.secure_url,name,email,password)
+
         const public_id=myCloud.public_id;
         const url=myCloud.secure_url;
-        // console.log({
-        //     name,email,password,
-        //     avatar:{
-        //         public_id:String(public_id),
-        //         url:String(url)
-        //     }
-        // })
+
         user=await User.create({
             name,email,password,
             avatar:{
@@ -33,7 +34,6 @@ export const registerUser=async(req,res,next)=>{
                 url:String(url)
             }
         })
-        // console.log(user)
         sendToken(user,201,res)
     }catch(error){
         const err=new Error("Trouble in creating the user")
@@ -46,7 +46,14 @@ export const registerUser=async(req,res,next)=>{
         err.extraDetails=error.message
         next(err)
     }finally{
-        console.log(user)
+        fs.unlink(req.file.path, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+            } else {
+                console.log('File deleted successfully');
+            }
+        });
+        // console.log(user)
     }
 }
 
@@ -217,7 +224,7 @@ export const updateProfile=async(req,res,next)=>{
         const image_id=user.avatar.public_id;
         await cloudinary.v2.uploader.destroy(image_id);
 
-        const myCloud=await cloudinary.v2.uploader.upload(req.body.avatar,{
+        const myCloud=await cloudinary.v2.uploader.upload(req.file.path,{
             folder:"avatars",
             width:150,
             crop:"scale"
@@ -244,6 +251,14 @@ export const updateProfile=async(req,res,next)=>{
         }
         err.extraDetails=error.message
         next(err)
+    }finally{
+        fs.unlink(req.file.path, (err) => {
+            if (err) {
+                console.error('Error deleting file:', err);
+            } else {
+                console.log('File deleted successfully');
+            }
+        });
     }
 }
 

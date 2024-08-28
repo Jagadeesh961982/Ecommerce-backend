@@ -1,14 +1,14 @@
 import {loginUser, registerUser,logOutUser,forgotPassword,resetPassword,userDetails, updatePassword, updateProfile, getAllUsers, getSingleUser, updateUserRole, deleteUser, feedback, getAllFeedbacks, deleteFeedback, addCartItems, removeCartItems, getAllCartItems, addShippingDetails, getShippingDetails, removeAllCartItems} from "../controllers/userController.js";
 import {authorizeRole, isAuthenticatedUser} from "../middleware/authenticaton.js";
 import express from "express";
+import { upload } from "../middleware/multerMiddleware.js";
 
 
 const router=express.Router();
 
 
 // register a user
-
-router.post("/register",registerUser);
+router.post("/register",upload.single('avatar'),registerUser);
 
 // Login User
 router.post("/login",loginUser)
@@ -29,7 +29,7 @@ router.get("/profile",isAuthenticatedUser,userDetails)
 router.put("/password/update",isAuthenticatedUser,updatePassword)
 
 // update user profile
-router.put("/profile/update",isAuthenticatedUser,updateProfile)
+router.put("/profile/update",upload.single('avatar'),isAuthenticatedUser,updateProfile)
 
 // add cart items
 router.put("/cart/add",isAuthenticatedUser,addCartItems)

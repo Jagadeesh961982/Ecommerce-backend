@@ -7,8 +7,8 @@ import crypto from "crypto";
 const userSchema=new mongoose.Schema({
     name:{
         type:String,
-        maxLenght:[30,"Name can not exceed 30 characters"],
-        minLenght:[4,"Name must be at least 4 characters"],
+        maxLength:[30,"Name can not exceed 30 characters"],
+        minLength:[4,"Name must be at least 4 characters"],
         required:[true,"Name is required"],
     },
     email:{
@@ -20,7 +20,7 @@ const userSchema=new mongoose.Schema({
     password:{
         type:String,
         required:[true,"Password is required"],
-        minLenght:[6,"Password must be at least 6 characters"],
+        minLength:[6,"Password must be at least 6 characters"],
         select:false
 
     },

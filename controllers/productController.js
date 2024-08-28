@@ -1,25 +1,28 @@
 import {Product} from '../models/productModel.js'
 import ApiFeatures from '../utils/apifeatures.js';
 import cloudinary from "cloudinary";
+import fs from 'fs';
 
 // create a Product --For Admin
 export const newProduct=async(req,res,next)=>{
     try{
-        let images=[];
-        if(typeof(req.body.images)==="string"){
-            images.push(req.body.images)
-        }else{
-            images=req.body.images
+      
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ success: false, message: 'No files uploaded' });
         }
+        const images=req.files
         const imagesLinks=[]
         
         for(let i=0;i<images.length;i++){
-            const result=await cloudinary.v2.uploader.upload(images[i],{
+            const result=await cloudinary.v2.uploader.upload(images[i].path,{
                 folder:"products"
             })
             imagesLinks.push({
                 public_id:String(result.public_id),
                 url:String(result.secure_url)
+            })
+            fs.unlink(images[i].path,(err)=>{
+                if(err) throw err;
             })
         }
         req.body.images=imagesLinks;
@@ -35,7 +38,6 @@ export const newProduct=async(req,res,next)=>{
         next(err)
 
     }
-    
 }
 
 // get all products

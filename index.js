@@ -24,10 +24,7 @@ app.use(cors(
         credentials:true
     }
 ));
-app.use(bodyParser.urlencoded({extended:true}))
-app.use(fileUpload())
-
-
+app.use(bodyParser.urlencoded({extended:true}));
 
 
 // Database connection
