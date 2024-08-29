@@ -184,7 +184,7 @@ export const deleteProduct=async(req,res,next)=>{
 // Create new review and update the review
 export const createProductReview=async(req,res,next)=>{
     try{
-    const {rating,comment,productId}=req.body;3
+    const {rating,comment,productId}=req.body;
     const review={
         user:req.user._id,
         name:req.user.name,

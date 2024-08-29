@@ -24,7 +24,7 @@ router.put("/admin/product/:id",isAuthenticatedUser,authorizeRole("admin"),updat
 router.delete("/admin/product/:id",isAuthenticatedUser,authorizeRole("admin"),deleteProduct)
 
 // create a new review
-router.put("/review",isAuthenticatedUser,createProductReview)
+router.put("/review",isAuthenticatedUser,upload.none(),createProductReview)
 
 // get all reviews of a product
 router.get("/reviews",getProductReviews)
