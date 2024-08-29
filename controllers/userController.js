@@ -5,6 +5,7 @@ import crypto from "crypto";
 import cloudinary from "cloudinary";
 import Feedbacks from "../models/feedbackModel.js";
 import fs from 'fs';
+import path from "path";
 
 // register a user
 export const registerUser=async(req,res,next)=>{
@@ -92,7 +93,10 @@ export const loginUser=async(req,res,next)=>{
 export const logOutUser=async(req,res,next)=>{
     res.cookie("token",null,{
         expires:new Date(Date.now()),
-        httpOnly:true
+        httpOnly:true,
+        secure:true,
+        path:"/",
+        sameSite:"none"
     })
     res.status(200).json({success:true,message:"Logged out successfully"})
 }
