@@ -18,7 +18,7 @@ router.get("/product/:id",getSingleProduct)
 router.post("/admin/product/new",isAuthenticatedUser,authorizeRole("admin"),upload.array('images'),newProduct);
 
 // update a product --For Admin
-router.put("/admin/product/:id",isAuthenticatedUser,authorizeRole("admin"),updateProduct)
+router.put("/admin/product/:id",isAuthenticatedUser,authorizeRole("admin"),upload.array('images'),updateProduct)
 
 // delete a product --For Admin
 router.delete("/admin/product/:id",isAuthenticatedUser,authorizeRole("admin"),deleteProduct)

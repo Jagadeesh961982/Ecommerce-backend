@@ -111,29 +111,44 @@ export const getSingleProduct=async(req,res,next)=>{
 // update a product --By Admin
 export const updateProduct=async(req,res,next)=>{
     try{
+        
         if(req.body){
             const product=await Product.findById(req.params.id);
-            const images=product.images;
-            for(let i=0;i<images.length;i++){
-                await cloudinary.v2.uploader.destroy(images[i].public_id)
-            }
-            let newImages=[];
-            if(typeof(req.body.images)==="string"){
-                newImages.push(req.body.images)
+            if(req.files.length>0){
+               
+                const images=product.images;
+                for(let i=0;i<images.length;i++){
+                    await cloudinary.v2.uploader.destroy(images[i].public_id)
+                }
+                
+                let newImages=req.files;
+                // if(typeof(req.body.images)==="string"){
+                //     newImages.push(req.body.images)
+                // }else{
+                //     newImages=req.body.images
+                // }
+                const imagesLinks=[]
+                for(let i=0;i<newImages.length;i++){
+                    
+                    const result=await cloudinary.v2.uploader.upload(newImages[i].path,{
+                        folder:"products"
+                    })
+                    
+                    imagesLinks.push({
+                        public_id:String(result.public_id),
+                        url:String(result.secure_url)
+                    })
+                    fs.unlink(newImages[i].path,(err)=>{
+                        if(err) throw err;
+                    })
+                }
+                
+                req.body.images=imagesLinks;
             }else{
-                newImages=req.body.images
+                
+                req.body.images=product.images;
+
             }
-            const imagesLinks=[]
-            for(let i=0;i<newImages.length;i++){
-                const result=await cloudinary.v2.uploader.upload(newImages[i],{
-                    folder:"products"
-                })
-                imagesLinks.push({
-                    public_id:String(result.public_id),
-                    url:String(result.secure_url)
-                })
-            }
-            req.body.images=imagesLinks;
 
         }
         const upadtedProduct=await Product.findByIdAndUpdate(req.params.id,req.body,{
@@ -146,6 +161,7 @@ export const updateProduct=async(req,res,next)=>{
             err.status=404
             return next(err)
         }
+        
         res.status(200).json({success:true,upadtedProduct})
     }catch(error){
         const err=new Error("product_id not found")
