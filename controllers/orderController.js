@@ -90,6 +90,7 @@ export const getAllOrders=async(req,res,next)=>{
 // update order status --admin
 export const updateOrderStatus=async(req,res,next)=>{
     try {
+        //console.log("working")
         const {orderStatus}=req.body;
         const order=await Order.findById(req.params.id)
         if(!order){
@@ -123,8 +124,10 @@ export const updateOrderStatus=async(req,res,next)=>{
 }
 
 async function updateStock(productId,quantity){
+    console.log("productId",productId)
     const product =await Product.findById(productId)
     product.stock=product.stock-quantity
+    console.log(product.stock)
     await product.save({validateBeforeSave:false})
 }
 
