@@ -111,16 +111,14 @@ export const getSingleProduct=async(req,res,next)=>{
 // update a product --By Admin
 export const updateProduct=async(req,res,next)=>{
     try{
-        
         if(req.body){
             const product=await Product.findById(req.params.id);
             if(req.files.length>0){
-               
                 const images=product.images;
+                // console.log(images)
                 for(let i=0;i<images.length;i++){
                     await cloudinary.v2.uploader.destroy(images[i].public_id)
                 }
-                
                 let newImages=req.files;
                 // if(typeof(req.body.images)==="string"){
                 //     newImages.push(req.body.images)
@@ -129,10 +127,11 @@ export const updateProduct=async(req,res,next)=>{
                 // }
                 const imagesLinks=[]
                 for(let i=0;i<newImages.length;i++){
-                    
+                    // console.log(newImages[i].path)
                     const result=await cloudinary.v2.uploader.upload(newImages[i].path,{
                         folder:"products"
                     })
+                    // console.log("1.5")
                     
                     imagesLinks.push({
                         public_id:String(result.public_id),
@@ -144,6 +143,7 @@ export const updateProduct=async(req,res,next)=>{
                 }
                 
                 req.body.images=imagesLinks;
+                // console.log("2")
             }else{
                 
                 req.body.images=product.images;
@@ -157,13 +157,15 @@ export const updateProduct=async(req,res,next)=>{
             useFindAndModify:false
         })
         if(!upadtedProduct){
+            // console.log("4")
             const err=new Error("product_id not found")
             err.status=404
             return next(err)
         }
-        
+        // console.log("5")
         res.status(200).json({success:true,upadtedProduct})
     }catch(error){
+        // console.log("6")
         const err=new Error("product_id not found")
         err.status=404
         err.extraDetails=error.message
