@@ -10,60 +10,78 @@ import paymentRoutes from './routes/paymentRoute.js';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import cloudinary from 'cloudinary';
-import fileUpload from 'express-fileupload';
+import cluster from 'cluster';
+import os from 'os';
 
-
-const app=express();
-dotenv.config({path:'./config/config.env'});
-
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors(
-    {
-        origin:[process.env.FRONTEND_URL],
-        credentials:true
+const numCPUs = os.cpus().length;
+if(cluster.isPrimary){
+    for(let i=0;i<numCPUs;i++){
+        cluster.fork();
     }
-));
-app.use(bodyParser.urlencoded({extended:true}));
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`worker ${worker.process.pid} died`);
+        cluster.fork();
+      });
+}else{
+
+    const app=express();
+    dotenv.config({path:'./config/config.env'});
+
+    app.use(express.json());
+    app.use(cookieParser());
+    app.use(cors(
+        {
+            origin:[process.env.FRONTEND_URL],
+            credentials:true
+        }
+    ));
+    app.use(bodyParser.urlencoded({extended:true}));
 
 
-// Database connection
-mongoose.connect(process.env.MONGO_URL)
-.then(()=>{
-    console.log("database connected")
-})
-.catch((err)=>{
-    console.log(err)
-})
+    app.use((req, res, next) => {
+        res.setHeader('Connection', 'close');
+        next();
+    });
 
-// cloudinary configuration
-cloudinary.config({
-    cloud_name:process.env.CLOUD_NAME,
-    api_key:process.env.CLOUD_API_KEY,
-    api_secret:process.env.CLOUD_API_SECRET
-})
+    // Database connection
+    mongoose.connect(process.env.MONGO_URL)
+    .then(()=>{
+        console.log("database connected")
+    })
+    .catch((err)=>{
+        console.log(err)
+    })
 
-
-// Routes
-app.get("/",(req,res)=>{
-    res.send("server running")
-})
-
-app.use("/api",productRoutes)
-
-// user routes
-app.use("/api",userRoutes)
-
-// order routes
-app.use("/api",orderRoutes)
-
-// payment routes
-app.use("/api",paymentRoutes)
-
-// error middleware
-app.use(errorMidleware)
+    // cloudinary configuration
+    cloudinary.config({
+        cloud_name:process.env.CLOUD_NAME,
+        api_key:process.env.CLOUD_API_KEY,
+        api_secret:process.env.CLOUD_API_SECRET
+    })
 
 
-app.listen(process.env.PORT,()=>{
-    console.log(`server running on port ${process.env.PORT}`)
-});
+    // Routes
+    app.get("/",(req,res)=>{
+        res.send(`server running ${process.pid}`)
+    })
+
+    app.use("/api",productRoutes)
+
+    // user routes
+    app.use("/api",userRoutes)
+
+    // order routes
+    app.use("/api",orderRoutes)
+
+    // payment routes
+    app.use("/api",paymentRoutes)
+
+    // error middleware
+    app.use(errorMidleware)
+
+
+    app.listen(process.env.PORT,()=>{
+        console.log(`server running on port ${process.env.PORT}`)
+    });
+    console.log(`Worker ${process.pid} started`);
+}
