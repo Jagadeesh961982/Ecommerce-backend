@@ -438,8 +438,10 @@ export const deleteUser=async(req,res,next)=>{
 // feedback by user
 export const feedback=async(req,res,next)=>{
     try{
-        const id=req.user.id;
-        const {message}=req.body;
+        console.log("Feedback received")
+        console.log(req.body)
+        const {id,message}=req.body;
+        console.log({id,message})
         const feed=await Feedbacks.create({
             userId:id,
             feedback:message
