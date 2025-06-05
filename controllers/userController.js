@@ -62,6 +62,7 @@ export const registerUser=async(req,res,next)=>{
 export const loginUser=async(req,res,next)=>{
     try{
         const {email,password}=req.body;
+        console.log(email,password)
         if(!email||!password){
             const err=new Error("Please enter email and password")
             err.status=400;
@@ -437,8 +438,8 @@ export const deleteUser=async(req,res,next)=>{
 // feedback by user
 export const feedback=async(req,res,next)=>{
     try{
-        // console.log(req.body)
-        const {id,message}=req.body;
+        const id=req.user.id;
+        const {message}=req.body;
         const feed=await Feedbacks.create({
             userId:id,
             feedback:message
